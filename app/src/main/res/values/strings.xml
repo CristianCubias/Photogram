@@ -1,0 +1,44 @@
+<resources>
+    <string name="app_name" translatable="false">Photogram</string>
+    <string name="feed" translatable="false">Feed</string>
+    <string name="liked_posts">Liked Posts</string>
+    <string name="placeholder_text" translatable="false">Placeholder</string>
+    <string name="details_label">Details</string>
+    <string name="width_label">Width</string>
+    <string name="height_label">Height</string>
+    <string name="views_label">Views</string>
+    <string name="download_count_label">Downloads</string>
+    <string name="likesTxt">Liked by %d people</string>
+    <string name="followTxt">Follow</string>
+    <string name="post_no_description">No description</string>
+    <!-- Plurals for seconds, hours, days, weeks, months and years-->
+    <plurals name="seconds_plural">
+        <item quantity="one">%d second ago</item>
+        <item quantity="other">%d seconds ago</item>
+    </plurals>
+    <plurals name="minutes_plural">
+        <item quantity="one">%d minute ago</item>
+        <item quantity="other">%d minutes ago</item>
+    </plurals>
+    <plurals name="hours_plural">
+        <item quantity="one">%d hour ago</item>
+        <item quantity="other">%d hours ago</item>
+    </plurals>
+    <plurals name="days_plural">
+        <item quantity="one">%d day ago</item>
+        <item quantity="other">%d days ago</item>
+    </plurals>
+    <plurals name="weeks_plural">
+        <item quantity="one">%d week ago</item>
+        <item quantity="other">%d weeks ago</item>
+    </plurals>
+    <plurals name="months_plural">
+        <item quantity="one">%d month ago</item>
+        <item quantity="other">%d months ago</item>
+    </plurals>
+    <plurals name="years_plural">
+        <item quantity="one">%d year ago</item>
+        <item quantity="other">%d years ago</item>
+    </plurals>
+    <string name="just_now">Just now</string>
+</resources>

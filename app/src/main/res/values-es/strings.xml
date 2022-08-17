@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="liked_posts">Favoritos</string>
+    <string name="details_label">Detalles</string>
+    <string name="width_label">Ancho</string>
+    <string name="height_label">Alto</string>
+    <string name="views_label">Vistas</string>
+    <string name="download_count_label">Descargas</string>
+    <string name="likesTxt">Le gusta a %d personas</string>
+    <string name="followTxt">Seguir</string>
+    <string name="post_no_description">Sin descripción</string>
+    <string name="just_now">Justo ahora</string>
+    <plurals name="seconds_plural">
+        <item quantity="one">Hace %d segundo</item>
+        <item quantity="other">Hace %d segundos</item>
+    </plurals>
+    <plurals name="minutes_plural">
+        <item quantity="one">Hace %d minuto</item>
+        <item quantity="other">Hace %d minutos</item>
+    </plurals>
+    <plurals name="hours_plural">
+        <item quantity="one">Hace %d hora</item>
+        <item quantity="other">Hace %d horas</item>
+    </plurals>
+    <plurals name="days_plural">
+        <item quantity="one">Hace %d día</item>
+        <item quantity="other">Hace %d días</item>
+    </plurals>
+    <plurals name="weeks_plural">
+        <item quantity="one">Hace %d semana</item>
+        <item quantity="other">Hace %d semanas</item>
+    </plurals>
+    <plurals name="months_plural">
+        <item quantity="one">Hace %d mes</item>
+        <item quantity="other">Hace %d meses</item>
+    </plurals>
+    <plurals name="years_plural">
+        <item quantity="one">Hace %d año</item>
+        <item quantity="other">Hace %d años</item>
+    </plurals>
+</resources>
