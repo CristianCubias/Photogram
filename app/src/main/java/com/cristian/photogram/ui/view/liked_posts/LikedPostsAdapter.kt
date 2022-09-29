@@ -2,13 +2,10 @@ package com.cristian.photogram.ui.view.liked_posts
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.paging.PagingData
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import com.cristian.photogram.databinding.PostItemBinding
 import com.cristian.photogram.domain.model.Post
-import com.cristian.photogram.ui.view.feed.PostViewHolder
 
 class LikedPostsAdapter(
     private val postClickListener: (post: Post, btnID: String) -> Unit) : PagingDataAdapter<Post, LikedPostsViewHolder>(PostDiffCallback()) {

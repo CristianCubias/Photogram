@@ -34,23 +34,24 @@ class FeedFragment : Fragment() {
     private var _adapter: PostAdapter? = null
     private val adapter: PostAdapter get() = _adapter!!
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        _binding = FragmentFeedBinding.inflate(layoutInflater)
-        _adapter = PostAdapter(this::onPostClicked)
-        binding.postRv.layoutManager = LinearLayoutManager(context)
-        (binding.postRv.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
-        binding.postRv.adapter = adapter
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        _binding = FragmentFeedBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        _adapter = PostAdapter(this::onPostClicked)
+        binding.postRv.layoutManager = LinearLayoutManager(context)
+        (binding.postRv.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+        binding.postRv.adapter = adapter
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
                 viewModel.getPosts().collect {
-                    adapter.submitData(viewLifecycleOwner.lifecycle, it)
+                    adapter.submitData(it)
                 }
             }
         }
@@ -61,7 +62,6 @@ class FeedFragment : Fragment() {
                 } else -> {}
             }
         }
-        return binding.root
     }
 
     override fun onDestroy() {
@@ -81,30 +81,38 @@ class FeedFragment : Fragment() {
             when(post.likedByUser){
                 true -> {
                     //First, remove the post from the database, then update the UI
-                    when(val result = viewModel.removeLikedPost(post.id)){
-                        is Resource.Success -> {
-                            adapter.snapshot().getOrNull(position)?.likedByUser = !post.likedByUser
-                            adapter.notifyItemChanged(position)
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
+                            when(val result = viewModel.removeLikedPost(post.id)){
+                                is Resource.Success -> {
+                                    adapter.snapshot().getOrNull(position)?.likedByUser = !post.likedByUser
+                                    adapter.notifyItemChanged(position)
+                                }
+                                is Resource.Error -> {
+                                    Log.e("Feed Fragment", "Error removing liked post: ${result.error}")
+                                    Toast.makeText(context, "An unexpected error occurred, please try again", Toast.LENGTH_LONG).show()
+                                }
+                                else -> {}
+                            }
                         }
-                        is Resource.Error -> {
-                            Log.e("Feed Fragment", "Error removing liked post: ${result.error}")
-                            Toast.makeText(context, "An unexpected error occurred, please try again", Toast.LENGTH_LONG).show()
-                        }
-                        else -> {}
                     }
                 }
                 false -> {
                     //First, add the post to the database, then update the UI
-                    when(val result = viewModel.addLikedPost(post)){
-                        is Resource.Success -> {
-                            adapter.snapshot().getOrNull(position)?.likedByUser = !post.likedByUser
-                            adapter.notifyItemChanged(position)
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                            when(val result = viewModel.addLikedPost(post)){
+                                is Resource.Success -> {
+                                    adapter.snapshot().getOrNull(position)?.likedByUser = !post.likedByUser
+                                    adapter.notifyItemChanged(position)
+                                }
+                                is Resource.Error -> {
+                                    Log.e("Feed Fragment", "Error adding liked post: ${result.error}")
+                                    Toast.makeText(context, "An unexpected error occurred, please try again", Toast.LENGTH_SHORT).show()
+                                }
+                                is Resource.Loading -> {}
+                            }
                         }
-                        is Resource.Error -> {
-                            Log.e("Feed Fragment", "Error adding liked post: ${result.error}")
-                            Toast.makeText(context, "An unexpected error occurred, please try again", Toast.LENGTH_SHORT).show()
-                        }
-                        is Resource.Loading -> {}
                     }
                 }
             }
@@ -123,5 +131,4 @@ class FeedFragment : Fragment() {
                 .show()
         }
     }
-
 }

@@ -30,23 +30,25 @@ class LikedPostsFragment : Fragment() {
 
     private var _adapter: LikedPostsAdapter? = null
     private val adapter: LikedPostsAdapter get() = _adapter!!
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        _binding = FragmentLikedPostsBinding.inflate(layoutInflater)
-        _adapter = LikedPostsAdapter(this::onPostClicked)
-        binding.likedPostsRv.layoutManager = LinearLayoutManager(context)
-        binding.likedPostsRv.adapter = adapter
-        setSwipeRefresh()
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        _binding = FragmentLikedPostsBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        _adapter = LikedPostsAdapter(this::onPostClicked)
+        binding.likedPostsRv.layoutManager = LinearLayoutManager(context)
+        binding.likedPostsRv.adapter = adapter
+        setSwipeRefresh()
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
                 viewModel.getLikedPosts().collect {
-                    adapter.submitData(viewLifecycleOwner.lifecycle, it)
+                    adapter.submitData(it)
                 }
             }
         }
@@ -55,7 +57,7 @@ class LikedPostsFragment : Fragment() {
                 Log.e("LikedPostsFragment", "Error: ${(state.refresh as LoadState.Error).error}")
             }
         }
-        return binding.root
+
     }
 
     override fun onDestroy() {
@@ -76,17 +78,22 @@ class LikedPostsFragment : Fragment() {
          *   and refresh the list.
          */
         if(btnID == "like"){
-            when(val result = viewModel.removeLikedPost(post.id)){
-                is Resource.Success -> {
-                    adapter.refresh()
-                    Toast.makeText(context, "Post removed from liked posts", Toast.LENGTH_SHORT).show()
+            viewLifecycleOwner.lifecycleScope.launch {
+                viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
+                        when(val result = viewModel.removeLikedPost(post.id)){
+                            is Resource.Success -> {
+                                adapter.refresh()
+                                Toast.makeText(context, "Post removed from liked posts", Toast.LENGTH_SHORT).show()
+                            }
+                            is Resource.Error -> {
+                                Log.e("LikedPostsFragment", "Error removing post from liked posts: ${result.error}")
+                                Toast.makeText(context, "Error removing posts from liked posts", Toast.LENGTH_SHORT).show()
+                            }
+                            else -> {}
+                        }
+                    }
                 }
-                is Resource.Error -> {
-                    Log.e("LikedPostsFragment", "Error removing post from liked posts: ${result.error}")
-                    Toast.makeText(context, "Error removing posts from liked posts", Toast.LENGTH_SHORT).show()
-                }
-                else -> {}
-            }
+
         }
         else if (btnID == "details"){
             BottomSheetMaterialDialog.Builder(requireActivity())

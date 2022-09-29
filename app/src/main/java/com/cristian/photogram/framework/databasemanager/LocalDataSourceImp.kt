@@ -21,7 +21,6 @@ class LocalDataSourceImp(private val database: PostDatabase): LocalDataSource {
             val result = database.postDao().isLiked(postID)
             Resource.Success(result)
         } catch (e: Exception) {
-            println(e)
             Resource.Error(e)
         }
     }

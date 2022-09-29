@@ -30,46 +30,27 @@ class PostViewHolder(private val binding: PostItemBinding): RecyclerView.ViewHol
             with(postContentIv){
                 var doubleClickLastTime = 0L
                 this.setOnClickListener {
-                    run {
-                        if (System.currentTimeMillis() - doubleClickLastTime < 200) {
-                            if(!post.likedByUser) {
-                                likeBtn.playAnimation()
-                                postClickListener(post, "like", absoluteAdapterPosition)
-                            }
-                        } else { doubleClickLastTime = System.currentTimeMillis() }
-                    }
+                    if (System.currentTimeMillis() - doubleClickLastTime < 200 && !post.likedByUser) {
+                        setLikeState(
+                            firstLoadState = false,
+                            likeState = post.likedByUser,
+                            mainBtn = likeBtn
+                        )
+                        postClickListener(post, "like", absoluteAdapterPosition)
+                    } else { doubleClickLastTime = System.currentTimeMillis() }
                 }
             }
-
             with(likeBtn){
-                //Initial state
-                if(post.likedByUser) { setBackgroundResource(R.drawable.heart_active) }
-                else { setBackgroundResource(R.drawable.heart) }
-
+                setLikeState(firstLoadState = true, likeState = post.likedByUser, mainBtn = this)
+                setupLikeAnimation(this)
                 setOnClickListener {
-                    //Change state
-                    if(post.likedByUser) {
-                        setBackgroundResource(R.drawable.heart)
-                        postClickListener(post, "like", absoluteAdapterPosition)
-                    }
-                    else {
-                        setBackgroundResource(R.drawable.heart_active)
-                        playAnimation()
-                        postClickListener(post, "like", absoluteAdapterPosition)
-                    }
+                    setLikeState(
+                        firstLoadState = false,
+                        likeState = post.likedByUser,
+                        mainBtn = this
+                    )
+                    postClickListener(post, "like", absoluteAdapterPosition)
                 }
-                addAnimatorListener(object: Animator.AnimatorListener {
-                    override fun onAnimationRepeat(animation: Animator?) {}
-                    override fun onAnimationEnd(animation: Animator?) {
-                        setBackgroundResource(R.drawable.heart_active)
-                        isEnabled = true
-                    }
-                    override fun onAnimationCancel(animation: Animator?) {}
-                    override fun onAnimationStart(animation: Animator?) {
-                        setBackgroundResource(android.R.color.transparent)
-                        isEnabled = false
-                    }
-                })
             }
         }
     }
@@ -96,6 +77,40 @@ class PostViewHolder(private val binding: PostItemBinding): RecyclerView.ViewHol
                 minutes > 0 -> this.getQuantityString(R.plurals.minutes_plural, minutes.toInt(), minutes.toInt())
                 seconds > 0 -> this.getQuantityString(R.plurals.seconds_plural, seconds.toInt(), seconds.toInt())
                 else -> this.getString(R.string.just_now)
+            }
+        }
+    }
+
+    private fun setupLikeAnimation(button: LottieAnimationView){
+        with(button){
+            addAnimatorListener(object: Animator.AnimatorListener {
+                override fun onAnimationEnd(animation: Animator?) {
+                    isEnabled = true
+                }
+                override fun onAnimationCancel(animation: Animator?) {}
+                override fun onAnimationRepeat(p0: Animator?) {}
+                override fun onAnimationStart(animation: Animator?) {
+                    setBackgroundResource(android.R.color.transparent)
+                    isEnabled = false
+                }
+            })
+        }
+    }
+
+    private fun setLikeState(firstLoadState: Boolean, likeState: Boolean, mainBtn: LottieAnimationView) {
+        when {
+            likeState && firstLoadState -> {
+                mainBtn.setBackgroundResource(R.drawable.heart_active)
+            }
+            likeState && !firstLoadState -> {
+                mainBtn.setBackgroundResource(R.drawable.heart)
+            }
+            !likeState && firstLoadState -> {
+                mainBtn.setBackgroundResource(R.drawable.heart)
+            }
+            !likeState && !firstLoadState -> {
+                mainBtn.playAnimation()
+                mainBtn.setBackgroundResource(R.drawable.heart_active)
             }
         }
     }

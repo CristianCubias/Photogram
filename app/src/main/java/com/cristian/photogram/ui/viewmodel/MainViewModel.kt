@@ -1,20 +1,23 @@
 package com.cristian.photogram.ui.viewmodel
 
-import androidx.lifecycle.*
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.cristian.photogram.data.PostPagingSource
 import com.cristian.photogram.domain.model.Post
 import com.cristian.photogram.domain.model.Resource
-import com.cristian.photogram.domain.usecase.*
+import com.cristian.photogram.domain.usecase.AddLikedPostUseCase
+import com.cristian.photogram.domain.usecase.GetLikedPostsUseCase
+import com.cristian.photogram.domain.usecase.GetPostsFromRemoteUseCase
+import com.cristian.photogram.domain.usecase.RemoveLikedPostUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
-import kotlin.contracts.Returns
-import kotlin.coroutines.CoroutineContext
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
@@ -27,30 +30,14 @@ class MainViewModel @Inject constructor(
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable -> throwable.printStackTrace() }
     private val posts = getPostsFromRemoteUseCase(coroutineContext + exceptionHandler).cachedIn(viewModelScope)
     private val likedPosts = getLikedPostsUseCase(coroutineContext + exceptionHandler).cachedIn(viewModelScope)
-    fun getPosts(): Flow<PagingData<Post>> {
-        return posts
-    }
+    fun getPosts(): Flow<PagingData<Post>> { return posts }
     fun getLikedPosts(): Flow<PagingData<Post>> { return likedPosts }
 
-    fun addLikedPost(post: Post): Resource<Unit> {
-        return try {
-            viewModelScope.launch(coroutineContext + exceptionHandler) {
-                addLikedPostUseCase(post)
-            }
-            Resource.Success(Unit)
-        } catch (e: Exception) {
-            Resource.Error(e)
-        }
+    suspend fun addLikedPost(post: Post): Resource<Unit> {
+        return flow { emit(addLikedPostUseCase(post)) }.flowOn(coroutineContext).first()
     }
 
-    fun removeLikedPost(postId: String): Resource<Unit> {
-        return try {
-            viewModelScope.launch(coroutineContext + exceptionHandler) {
-                removeLikedPostUseCase(postId)
-            }
-            Resource.Success(Unit)
-        } catch (e: Exception) {
-            Resource.Error(e)
-        }
+    suspend fun removeLikedPost(postId: String): Resource<Unit> {
+        return flow { emit(removeLikedPostUseCase(postId)) }.flowOn(coroutineContext).first()
     }
 }
